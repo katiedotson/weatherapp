@@ -1,0 +1,114 @@
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+}
+
+Properties properties = new Properties()
+if (project.rootProject.file('local.properties').exists()) {
+    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+    if (!properties.containsKey("API_KEY")) {
+        throw new GradleException("Add API_KEY=\"{KEY}\" for weather API to local.properties. https://openweathermap.org ")
+    }
+} else {
+    throw new GradleException("local.properties file not found")
+}
+
+android {
+    namespace "xyz.katiedotson.weatherapp"
+    compileSdk 34
+    defaultConfig {
+        applicationId "xyz.katiedotson.weatherapp"
+        minSdkVersion 23
+        targetSdkVersion 34
+        versionCode 1
+        versionName "1.0"
+
+        buildConfigField "String", "API_KEY", properties.getProperty("API_KEY")
+
+        testInstrumentationRunner "xyz.katiedotson.weatherapp.WeatherAppInstrumentedTestRunner"
+        testInstrumentationRunnerArguments clearPackageData: 'true'
+    }
+    testOptions {
+        execution 'ANDROIDX_TEST_ORCHESTRATOR'
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    buildFeatures {
+        viewBinding true
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+}
+
+dependencies {
+
+    implementation "androidx.core:core-ktx:1.12.0"
+    implementation "androidx.appcompat:appcompat:1.6.1"
+    implementation "com.google.android.material:material:1.11.0"
+    implementation "androidx.constraintlayout:constraintlayout:2.1.4"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.7.0"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:2.7.0"
+    implementation "androidx.preference:preference-ktx:1.2.1"
+    implementation 'androidx.test.ext:junit-ktx:1.1.5'
+
+    // jetpack activity & fragment
+    def activity_version = "1.8.2"
+    def fragment_version = "1.6.2"
+    implementation "androidx.activity:activity-ktx:$activity_version"
+    implementation "androidx.fragment:fragment-ktx:$fragment_version"
+
+    // jetpack navigation
+    def nav_version = "2.7.7"
+    implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
+    implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
+
+    // dagger
+    def dagger_version = "2.51"
+    implementation "com.google.dagger:dagger:$dagger_version"
+    kapt "com.google.dagger:dagger-compiler:$dagger_version"
+    kapt "com.google.dagger:dagger-android-processor:$dagger_version"
+    implementation "com.google.dagger:dagger-android-support:$dagger_version"
+    compileOnly 'com.squareup.inject:assisted-inject-annotations-dagger2:0.5.2'
+    kapt 'com.squareup.inject:assisted-inject-processor-dagger2:0.5.2'
+
+    // network
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-moshi:2.9.0'
+    implementation("com.squareup.moshi:moshi-kotlin:1.15.0")
+    kapt "com.squareup.moshi:moshi-kotlin-codegen:1.15.0"
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+
+    // location
+    implementation 'com.google.android.gms:play-services-location:21.2.0'
+
+    // image loading
+    implementation 'com.github.bumptech.glide:glide:4.16.0'
+
+    // test
+    testImplementation "junit:junit:4.13.2"
+    testImplementation "org.mockito:mockito-core:5.11.0"
+    testImplementation('org.robolectric:robolectric:3.1.4')
+    kaptTest "com.google.dagger:dagger-compiler:$dagger_version"
+
+    // instrumented tests
+    def androidXTestVersion = "1.4.0"
+    def espressoVersion = "3.5.1"
+    androidTestUtil 'androidx.test:orchestrator:1.4.2'
+    androidTestImplementation "androidx.test:runner:$androidXTestVersion"
+    androidTestImplementation "androidx.test:rules:1.5.0"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
+    androidTestImplementation "androidx.test.uiautomator:uiautomator:2.3.0"
+    kaptAndroidTest "com.google.dagger:dagger-compiler:$dagger_version"
+
+}
